@@ -21,6 +21,7 @@ export function App({ store }) {
           <h1>TODO List</h1>
           <p>A simple TODO app created with Preact, Redux and TypeScript</p>
         </hgroup>
+        <img src="banner.svg" />
       </article>
       <article>
         <h2>Add a TODO</h2>
