@@ -7,13 +7,23 @@ export function App({ store }) {
   const taskDescription = useRef()
 
   store.subscribe(() => {
-    console.log(store.getState())
     setRerender(!rerender)
+  })
+
+  useEffect(() => {
+    console.log(store.getState())
   })
 
   return (
     <div>
       <article>
+        <hgroup>
+          <h1>TODO List</h1>
+          <p>A simple TODO app created with Preact, Redux and TypeScript</p>
+        </hgroup>
+      </article>
+      <article>
+        <h2>Add a TODO</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -49,6 +59,12 @@ export function App({ store }) {
       </article>
       <article>
         <h2>TODOs</h2>
+        {!store.getState().todos.length && (
+          <div style="text-align: center">
+            <i class="fa-solid fa-list-check" style="font-size: 40px"></i>
+            <h3>No items in todo</h3>
+          </div>
+        )}
         {store.getState().todos.map((todo) => {
           const _todoTask = useRef()
           const _todoDescription = useRef()
@@ -59,13 +75,12 @@ export function App({ store }) {
 
           const removeFocus = (elem) => {
             elem.removeAttribute('contenteditable')
-            // save new todo
             store.dispatch({
               type: 'todo/update',
               todo: {
-                ...todo,
-                task: _todoTask.current.value,
-                description: _todoDescription.current.value
+                id: todo.id,
+                task: _todoTask.current.innerText,
+                description: _todoDescription.current.innerText
               }
             })
           }
@@ -107,6 +122,12 @@ export function App({ store }) {
       </article>
       <article>
         <h2>TODOs (Completed)</h2>
+        {!store.getState().completed.length && (
+          <div style="text-align: center">
+            <i class="fa-regular fa-square-check" style="font-size: 40px"></i>
+            <h3>No todo completed</h3>
+          </div>
+        )}
         {store.getState().completed.map((todo) => {
           return (
             <details key={todo.id}>
@@ -125,6 +146,12 @@ export function App({ store }) {
             </details>
           )
         })}
+      </article>
+      <article style="text-align: center">
+        Made with <i class="fa-solid fa-heart" style="color: #e53b2c"></i> by{' '}
+        <a href="https://github.com/Adophilus" rel="noopener noreferrer">
+          Uchenna Ofoma
+        </a>
       </article>
     </div>
   )
