@@ -45,6 +45,19 @@ const store = createStore(
             (todo) => todo.id !== action.todo.id
           )
         }
+      case 'todo/update':
+        return {
+          ...state,
+          todos: [...state.todos].map((todo) =>
+            todo.id === action.todo.id
+              ? {
+                  id: todo.id,
+                  task: action.todo.task || todo.task,
+                  description: action.todo.description || todo.description
+                }
+              : todo
+          )
+        }
       default:
         return state
     }

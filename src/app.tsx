@@ -50,6 +50,7 @@ export function App({ store }) {
       <article>
         <h2>TODOs</h2>
         {store.getState().todos.map((todo) => {
+          const _todoTask = useRef()
           const _todoDescription = useRef()
           const addFocus = (elem) => {
             elem.setAttribute('contenteditable', 'true')
@@ -59,33 +60,42 @@ export function App({ store }) {
           const removeFocus = (elem) => {
             elem.removeAttribute('contenteditable')
             // save new todo
+            store.dispatch({
+              type: 'todo/update',
+              todo: {
+                ...todo,
+                task: _todoTask.current.value,
+                description: _todoDescription.current.value
+              }
+            })
           }
 
           return (
             <details key={todo.id}>
-              <summary style="display: flex; justify-content: space-between">
-                <span>
-                  <input
-                    type="checkbox"
-                    onClick={() =>
-                      store.dispatch({ type: 'todo/move-completed', todo })
-                    }
-                  />
-                  &nbsp;
+              <summary
+                onClick={(e) => e.detail === 2 && addFocus(_todoTask.current)}
+              >
+                <input
+                  type="checkbox"
+                  onClick={() =>
+                    store.dispatch({ type: 'todo/move-completed', todo })
+                  }
+                />
+                &nbsp;
+                <span
+                  ref={_todoTask}
+                  onKeyPress={(e) => e.key === 'Enter' && removeFocus(e.target)}
+                  onBlur={(e) => {
+                    removeFocus(e.target)
+                  }}
+                >
                   {todo.task}
                 </span>
-                <a
-                  href="#"
-                  style="margin-left: auto"
-                  onClick={() => addFocus(_todoDescription.current)}
-                >
-                  <i class="fa-regular fa-pen-to-square"></i>
-                </a>
               </summary>
               <p
                 ref={_todoDescription}
+                onClick={(e) => e.detail === 2 && addFocus(e.target)}
                 onBlur={(e) => {
-                  console.log('focus out')
                   removeFocus(e.target)
                 }}
               >
