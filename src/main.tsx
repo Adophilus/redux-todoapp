@@ -16,8 +16,34 @@ const store = createStore(
           ...state,
           todos: [
             ...state.todos,
-            { task: action.task, description: action.description }
+            {
+              id: Date.now(),
+              task: action.todo.task,
+              description: action.todo.description
+            }
           ]
+        }
+      case 'todo/move-completed':
+        const newState = {
+          ...state,
+          completed: [
+            ...state.completed,
+            state.todos.find((todo) => todo.id === action.todo.id)
+          ].filter((todo) => todo),
+          todos: [...state.todos].filter((todo) => todo.id !== action.todo.id)
+        }
+        console.log('newState:', newState)
+        return newState
+      case 'todo/move-todo':
+        return {
+          ...state,
+          todos: [
+            ...state.todos,
+            state.completed.find((todo) => todo.id === action.todo.id)
+          ].filter((todo) => todo),
+          completed: [...state.completed].filter(
+            (todo) => todo.id !== action.todo.id
+          )
         }
       default:
         return state
