@@ -2,6 +2,25 @@ import { render } from 'preact'
 import { App } from './app'
 import { createStore } from 'redux'
 
+const todo = (state, action) => {
+  switch (action.type) {
+    case 'todo/add':
+      return {
+        id: Date.now(),
+        task: action.todo.task,
+        description: action.todo.description
+      }
+    case 'todo/update':
+      return {
+        id: todo.id,
+        task: action.todo.task || todo.task,
+        description: action.todo.description || todo.description
+      }
+    default:
+      return state
+  }
+}
+
 const store = createStore(
   (
     state = {
@@ -14,48 +33,29 @@ const store = createStore(
       case 'todo/add':
         return {
           ...state,
-          todos: [
-            ...state.todos,
-            {
-              id: Date.now(),
-              task: action.todo.task,
-              description: action.todo.description
-            }
-          ]
+          todos: state.todos.concat(todo(null, action))
         }
       case 'todo/move-completed':
-        const newState = {
-          ...state,
-          completed: [
-            ...state.completed,
-            state.todos.find((todo) => todo.id === action.todo.id)
-          ].filter((todo) => todo),
-          todos: [...state.todos].filter((todo) => todo.id !== action.todo.id)
-        }
-        console.log('newState:', newState)
-        return newState
+        return Object.assign({}, state, {
+          completed: state.completed.concat(
+            state.todos.find((todo) => todo.id === action.todo.id) || []
+          ),
+          todos: state.todos.filter((todo) => todo.id !== action.todo.id)
+        })
       case 'todo/move-todo':
-        return {
-          ...state,
-          todos: [
-            ...state.todos,
-            state.completed.find((todo) => todo.id === action.todo.id)
-          ].filter((todo) => todo),
-          completed: [...state.completed].filter(
+        return Object.assign({}, state, {
+          todos: state.todos.concat(
+            state.completed.find((todo) => todo.id === action.todo.id) || []
+          ),
+          completed: state.completed.filter(
             (todo) => todo.id !== action.todo.id
           )
-        }
+        })
       case 'todo/update':
         return {
           ...state,
-          todos: [...state.todos].map((todo) =>
-            todo.id === action.todo.id
-              ? {
-                  id: todo.id,
-                  task: action.todo.task || todo.task,
-                  description: action.todo.description || todo.description
-                }
-              : todo
+          todos: state.todos.map((_todo) =>
+            _todo.id === action.todo.id ? todo(_todo, action) : _todo
           )
         }
       default:

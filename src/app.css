@@ -1,3 +1,23 @@
 :root {
   --primary: #6c63ff;
 }
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.note-actions {
+  display: flex;
+  justify-content: end;
+}
+
+.note-actions a {
+  background-color: transparent;
+  color: black;
+  border: 0;
+}
+
+.note-actions a:hover {
+  color: var(--primary);
+}

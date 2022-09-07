@@ -2,12 +2,12 @@ import './app.css'
 import { useEffect, useState, useRef } from 'preact/hooks'
 
 export function App({ store }) {
-  const [rerender, setRerender] = useState(false)
+  const [isAddingTodo, setIsAddingTodo] = useState(false)
   const taskName = useRef()
   const taskDescription = useRef()
 
   store.subscribe(() => {
-    setRerender(!rerender)
+    setIsAddingTodo(false)
   })
 
   useEffect(() => {
@@ -28,6 +28,7 @@ export function App({ store }) {
         <form
           onSubmit={(e) => {
             e.preventDefault()
+            setIsAddingTodo(true)
 
             store.dispatch({
               type: 'todo/add',
@@ -53,13 +54,24 @@ export function App({ store }) {
             style="resize: none"
             placeholder="Enter task details..."
           ></textarea>
-          <button type="submit">
-            <i class="fa-solid fa-plus"></i>&nbsp; Add Todo
+          <button type="submit" aria-busy={isAddingTodo}>
+            {isAddingTodo ? (
+              <>Adding...</>
+            ) : (
+              <>
+                <i class="fa-solid fa-plus"></i>&nbsp; Add Todo
+              </>
+            )}
           </button>
         </form>
       </article>
       <article>
-        <h2>TODOs</h2>
+        <div class="todo-header">
+          <h2>TODOs</h2>
+          <a href="#" data-tooltip="Double click on a note to edit">
+            <i class="fa-solid fa-circle-info"></i>
+          </a>
+        </div>
         {!store.getState().todos.length && (
           <div style="text-align: center">
             <i class="fa-solid fa-list-check" style="font-size: 40px"></i>
@@ -116,6 +128,20 @@ export function App({ store }) {
                 }}
               >
                 {todo.description}
+              </p>
+              <p>
+                <div class="note-actions">
+                  <a
+                    role="button"
+                    href="#"
+                    onClick={() => addFocus(_todoDescription.current)}
+                  >
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </a>
+                  <a role="button" href="#">
+                    <i class="fa-solid fa-trash"></i>
+                  </a>
+                </div>
               </p>
             </details>
           )
