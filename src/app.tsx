@@ -2,12 +2,12 @@ import './app.css'
 import { useEffect, useState, useRef } from 'preact/hooks'
 
 export function App({ store }) {
-  const [isAddingTodo, setIsAddingTodo] = useState(false)
+  const [isAddingTodo, setIsAddingTodo] = useState(Date.now() + 86400 * 1000)
   const taskName = useRef()
   const taskDescription = useRef()
 
   store.subscribe(() => {
-    setIsAddingTodo(false)
+    setIsAddingTodo(Date.now() + 86400 * 1000)
   })
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function App({ store }) {
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            setIsAddingTodo(true)
+            setIsAddingTodo(Date.now() - 86400 * 1000)
 
             store.dispatch({
               type: 'todo/add',
@@ -54,8 +54,8 @@ export function App({ store }) {
             style="resize: none"
             placeholder="Enter task details..."
           ></textarea>
-          <button type="submit" aria-busy={isAddingTodo}>
-            {isAddingTodo ? (
+          <button type="submit" aria-busy={isAddingTodo < Date.now()}>
+            {isAddingTodo < Date.now() ? (
               <>Adding...</>
             ) : (
               <>
