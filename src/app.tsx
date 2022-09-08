@@ -1,18 +1,24 @@
 import './app.css'
+import preact from 'preact'
 import { useEffect, useState, useRef } from 'preact/hooks'
+import { Todo, Store } from './types'
 
-export function App({ store }) {
+interface Props {
+  store: Store
+}
+
+export function App({ store }: Props) {
   const [isAddingTodo, setIsAddingTodo] = useState(Date.now() + 86400 * 1000)
-  const taskName = useRef()
-  const taskDescription = useRef()
-
-  store.subscribe(() => {
-    setIsAddingTodo(Date.now() + 86400 * 1000)
-  })
+  const taskName = useRef<HTMLInputElement>()
+  const taskDescription = useRef<HTMLTextAreaElement>()
 
   useEffect(() => {
-    console.log(store.getState())
-  })
+    const unsubscribe = store.subscribe(() => {
+      setIsAddingTodo(Date.now() + 86400 * 1000)
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   return (
     <div>
@@ -28,28 +34,37 @@ export function App({ store }) {
         <form
           onSubmit={(e) => {
             e.preventDefault()
+
+            if (!taskName.current || !taskDescription.current) return
+
             setIsAddingTodo(Date.now() - 86400 * 1000)
+            const task = taskName.current.value
+            const description = taskName.current.value
 
-            store.dispatch({
-              type: 'todo/add',
-              todo: {
-                task: taskName.current.value,
-                description: taskDescription.current.value
-              }
-            })
+            if (task && description) {
+              store.dispatch({
+                type: 'todo/add',
+                todo: {
+                  task,
+                  description
+                } as Todo
+              })
 
-            taskName.current.value = ''
-            taskDescription.current.value = ''
+              taskName.current.value = ''
+              taskDescription.current.value = ''
+            } else {
+              alert('Task name or description cannot be empty!')
+            }
           }}
         >
           <input
-            ref={taskName}
+            ref={taskName as preact.RefObject<HTMLInputElement>}
             required
             type="text"
             placeholder="Enter task name..."
           />
           <textarea
-            ref={taskDescription}
+            ref={taskDescription as preact.RefObject<HTMLTextAreaElement>}
             required
             style="resize: none"
             placeholder="Enter task details..."
@@ -78,15 +93,20 @@ export function App({ store }) {
             <h3>No items in todo</h3>
           </div>
         )}
-        {store.getState().todos.map((todo) => {
-          const _todoTask = useRef()
-          const _todoDescription = useRef()
-          const addFocus = (elem) => {
+        {store.getState().todos.map((todo: Todo) => {
+          const _todoTask = useRef<HTMLInputElement>()
+          const _todoDescription = useRef<HTMLParagraphElement>()
+
+          const addFocus = (elem: HTMLElement) => {
+            if (!elem) return
+
             elem.setAttribute('contenteditable', 'true')
             elem.focus()
           }
 
-          const removeFocus = (elem) => {
+          const removeFocus = (elem: HTMLElement) => {
+            if (!elem || !_todoTask.current || !_todoDescription.current) return
+
             elem.removeAttribute('contenteditable')
             store.dispatch({
               type: 'todo/update',
@@ -94,14 +114,17 @@ export function App({ store }) {
                 id: todo.id,
                 task: _todoTask.current.innerText,
                 description: _todoDescription.current.innerText
-              }
+              } as Todo
             })
           }
 
           return (
             <details key={todo.id}>
               <summary
-                onClick={(e) => e.detail === 2 && addFocus(_todoTask.current)}
+                onClick={(e) =>
+                  e.detail === 2 &&
+                  addFocus(_todoTask.current as HTMLInputElement)
+                }
               >
                 <input
                   type="checkbox"
@@ -111,20 +134,25 @@ export function App({ store }) {
                 />
                 &nbsp;
                 <span
-                  ref={_todoTask}
-                  onKeyPress={(e) => e.key === 'Enter' && removeFocus(e.target)}
+                  ref={_todoTask as preact.RefObject<HTMLInputElement>}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' &&
+                    removeFocus(e.target as HTMLInputElement)
+                  }
                   onBlur={(e) => {
-                    removeFocus(e.target)
+                    removeFocus(e.target as HTMLInputElement)
                   }}
                 >
                   {todo.task}
                 </span>
               </summary>
               <p
-                ref={_todoDescription}
-                onClick={(e) => e.detail === 2 && addFocus(e.target)}
+                ref={_todoDescription as HTMLParagraphElement}
+                onClick={(e) =>
+                  e.detail === 2 && addFocus(e.target as HTMLParagraphElement)
+                }
                 onBlur={(e) => {
-                  removeFocus(e.target)
+                  removeFocus(e.target as HTMLParagraphElement)
                 }}
               >
                 {todo.description}
@@ -134,7 +162,9 @@ export function App({ store }) {
                   <a
                     role="button"
                     href="#"
-                    onClick={() => addFocus(_todoDescription.current)}
+                    onClick={() =>
+                      addFocus(_todoDescription.current as HTMLParagraphElement)
+                    }
                   >
                     <i class="fa-solid fa-pen-to-square"></i>
                   </a>
@@ -155,7 +185,7 @@ export function App({ store }) {
             <h3>No todo completed</h3>
           </div>
         )}
-        {store.getState().completed.map((todo) => {
+        {store.getState().completed.map((todo: Todo) => {
           return (
             <details key={todo.id}>
               <summary style="text-decoration: line-through">
