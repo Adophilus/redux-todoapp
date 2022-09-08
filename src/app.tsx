@@ -27,7 +27,9 @@ export function App({ store }: Props) {
           <h1>TODO List</h1>
           <p>A simple TODO app created with Preact, Redux and TypeScript</p>
         </hgroup>
-        <img src="banner.svg" />
+        <div style="display: flex; justify-content: center">
+          <img src="banner.svg" />
+        </div>
       </article>
       <article>
         <h2>Add a TODO</h2>
@@ -39,7 +41,7 @@ export function App({ store }: Props) {
 
             setIsAddingTodo(Date.now() - 86400 * 1000)
             const task = taskName.current.value
-            const description = taskName.current.value
+            const description = taskDescription.current.value
 
             if (task && description) {
               store.dispatch({
@@ -147,7 +149,7 @@ export function App({ store }: Props) {
                 </span>
               </summary>
               <p
-                ref={_todoDescription as HTMLParagraphElement}
+                ref={_todoDescription as preact.RefObject<HTMLParagraphElement>}
                 onClick={(e) =>
                   e.detail === 2 && addFocus(e.target as HTMLParagraphElement)
                 }
