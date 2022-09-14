@@ -1,5 +1,6 @@
 {
   "name": "redux-todoapp",
+  "homepage": "https://adophilus.github.io/redux-todoapp",
   "private": true,
   "version": "0.0.0",
   "type": "module",
