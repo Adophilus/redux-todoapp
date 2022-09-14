@@ -7,7 +7,8 @@
     "dev": "vite --port 3000",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "format:watch": "cd .scripts && pnpm format:watch .."
+    "format:watch": "cd .scripts && pnpm format:watch ..",
+    "deploy:web": "env $(cat .env | xargs) .scripts/deploy-ssh.sh"
   },
   "dependencies": {
     "preact": "^10.10.6",
