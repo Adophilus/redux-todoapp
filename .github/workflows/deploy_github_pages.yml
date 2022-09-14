@@ -1,8 +1,6 @@
-name: Deploy React Application
+name: Deploy Web Application
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
   pull_request:
@@ -10,28 +8,46 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build_test:
-    # The type of runner that the job will run on
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12.x] # We will deploy with only one version of node  
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@1
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: npm ci and build
-        run: |
-          npm ci
-          npm run build --if-present
-      - name: deploy to gh-pages
+          node-version: 18
+
+      - name: Install dependencies
+        uses: jaid/action-npm-install@v1
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Upload production-ready build files
+        uses: actions/upload-artifact@v3
+        with:
+          name: production-files
+          path: ./dist
+  
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download production-ready build files
+        uses: actions/download-artifact@v3
+        with:
+          name: production-files
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_dir: ./dist          
+          publish_dir: ./dist
