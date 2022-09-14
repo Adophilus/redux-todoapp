@@ -22,13 +22,13 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        uses: jaid/action-npm-install@v1
+        uses: jaid/action-npm-install@v1.2.4
 
       - name: Build project
         run: pnpm build
 
       - name: Upload production-ready build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.0
         with:
           name: production-files
           path: ./dist
@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Download production-ready build files
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.0
         with:
           name: production-files
           path: ./dist
